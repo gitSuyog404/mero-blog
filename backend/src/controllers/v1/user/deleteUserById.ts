@@ -16,12 +16,9 @@ import User from '@/models/user';
 
 import type { Request, Response } from 'express';
 
-const deleteCurrentUser = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
+const deleteUserById = async (req: Request, res: Response): Promise<void> => {
   try {
-    const userId = req.userId;
+    const userId = req.params.userId;
 
     await User.deleteOne({ _id: userId });
     logger.info('A user account has been deleted', {
@@ -38,4 +35,4 @@ const deleteCurrentUser = async (
   }
 };
 
-export default deleteCurrentUser;
+export default deleteUserById;
