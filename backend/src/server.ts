@@ -53,6 +53,9 @@ const corsOptions: CorsOptions = {
       logger.warn(`CORS error: ${origin} is not allowed by CORS`);
     }
   },
+  credentials: true, // Allow credentials (cookies, authorization headers, etc.)
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 };
 
 // Apply Cors middleware

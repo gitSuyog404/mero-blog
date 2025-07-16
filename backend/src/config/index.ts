@@ -16,7 +16,11 @@ const config = {
   PORT: process.env.PORT || 3000,
   NODE_ENV: process.env.NODE_ENV,
   // Allowed origins
-  WHITELIST_ORIGINS: ['https://localhost:3000'],
+  WHITELIST_ORIGINS: [
+    'http://localhost:5173', // Vite dev server
+    'http://localhost:3000', // Backend server
+    'https://localhost:3000',
+  ],
   MONGO_URI: process.env.MONGO_URI,
   LOG_LEVEL: process.env.LOG_LEVEL || 'info',
   JWT_ACCESS_SECRET: process.env.JWT_ACCESS_SECRET!,
