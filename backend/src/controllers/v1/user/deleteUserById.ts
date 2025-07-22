@@ -30,12 +30,20 @@ const deleteUserById = async (req: Request, res: Response): Promise<void> => {
       .lean()
       .exec();
 
-    const publicIds = blogs.map(({ banner }) => banner.publicId);
-    await cloudinary.api.delete_resources(publicIds);
+    const publicIds = blogs
+      .map(({ banner }) => banner?.publicId)
+      .filter((publicId) => publicId); // Filter out undefined/null values
 
-    logger.info('Multiple blog banners deleted from Cloudinary', {
-      publicIds,
-    });
+    if (publicIds.length > 0) {
+      await cloudinary.api.delete_resources(publicIds);
+      logger.info('Multiple blog banners deleted from Cloudinary', {
+        publicIds,
+      });
+    } else {
+      logger.info('No blog banners to delete from Cloudinary', {
+        userId,
+      });
+    }
 
     await Blog.deleteMany({ author: userId });
     logger.info('Multiple blogs deleted', {

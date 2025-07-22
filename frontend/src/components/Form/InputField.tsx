@@ -22,7 +22,6 @@ const InputField: React.FC<InputFieldProps> = ({
   disabled = false,
   autoComplete,
 }) => {
-  const [isFocused, setIsFocused] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   const isPasswordField = type === "password";
@@ -40,7 +39,6 @@ const InputField: React.FC<InputFieldProps> = ({
 
           return (
             <div className="relative">
-              {/* Label */}
               <motion.label
                 htmlFor={name}
                 className={clsx(
@@ -60,9 +58,7 @@ const InputField: React.FC<InputFieldProps> = ({
                 {label}
               </motion.label>
 
-              {/* Input Container */}
               <div className="relative">
-                {/* Input */}
                 <motion.input
                   {...field}
                   id={name}
@@ -84,8 +80,6 @@ const InputField: React.FC<InputFieldProps> = ({
                       "pr-12": isPasswordField,
                     }
                   )}
-                  onFocus={() => setIsFocused(true)}
-                  onBlur={() => setIsFocused(false)}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{
@@ -108,7 +102,6 @@ const InputField: React.FC<InputFieldProps> = ({
                   }
                 />
 
-                {/* Password Toggle */}
                 {isPasswordField && (
                   <motion.button
                     type="button"
@@ -175,7 +168,6 @@ const InputField: React.FC<InputFieldProps> = ({
         }}
       </Field>
 
-      {/* Error Message */}
       <ErrorMessage name={name}>
         {(msg) => (
           <motion.div

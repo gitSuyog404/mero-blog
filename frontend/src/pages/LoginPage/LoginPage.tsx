@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { Formik, Form } from "formik";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { FaGoogle, FaGithub } from "react-icons/fa";
-import { InputField } from "../../components/Form";
+import InputField from "../../components/Form/InputField";
+import Loader from "../../components/Loader/Loader";
 import { loginSchema, type LoginFormValues } from "../../schemas/authSchemas";
 import { useLoginMutation } from "../../redux/slices/authApiSlice";
 import { setCredentials } from "../../redux/slices/authSlice";
@@ -26,7 +27,6 @@ export default function LoginPage() {
     password: "",
   };
 
-  // Redirect if already logged in
   useEffect(() => {
     if (userInfo) {
       navigate(from, { replace: true });
@@ -77,7 +77,6 @@ export default function LoginPage() {
         initial="hidden"
         animate="visible"
       >
-        {/* Header */}
         <motion.div className="text-center" variants={itemVariants}>
           <Link
             to="/"
@@ -93,7 +92,6 @@ export default function LoginPage() {
           </p>
         </motion.div>
 
-        {/* Form Container */}
         <motion.div
           className="mt-8 bg-white py-8 px-4 shadow-lg sm:rounded-lg sm:px-10"
           variants={itemVariants}
@@ -105,7 +103,6 @@ export default function LoginPage() {
           >
             {({ isValid, dirty }) => (
               <Form className="space-y-6">
-                {/* Email Field */}
                 <InputField
                   name="email"
                   label="Email address"
@@ -114,7 +111,6 @@ export default function LoginPage() {
                   autoComplete="email"
                 />
 
-                {/* Password Field */}
                 <InputField
                   name="password"
                   label="Password"
@@ -123,7 +119,6 @@ export default function LoginPage() {
                   autoComplete="current-password"
                 />
 
-                {/* Forgot Password Link */}
                 <div className="flex items-center justify-end">
                   <Link
                     to="/forgot-password"
@@ -133,7 +128,6 @@ export default function LoginPage() {
                   </Link>
                 </div>
 
-                {/* Submit Button */}
                 <motion.button
                   type="submit"
                   disabled={!isValid || !dirty || isLoading}
@@ -143,16 +137,8 @@ export default function LoginPage() {
                 >
                   {isLoading ? (
                     <div className="flex items-center">
-                      <motion.div
-                        className="w-5 h-5 border-2 border-white border-t-transparent rounded-full mr-2"
-                        animate={{ rotate: 360 }}
-                        transition={{
-                          duration: 1,
-                          repeat: Infinity,
-                          ease: "linear",
-                        }}
-                      />
-                      Signing in...
+                      <Loader size="sm" variant="spinner" />
+                      <span className="ml-2">Signing in...</span>
                     </div>
                   ) : (
                     "Sign in"
@@ -162,7 +148,6 @@ export default function LoginPage() {
             )}
           </Formik>
 
-          {/* Divider */}
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
@@ -176,7 +161,6 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Social Login Buttons */}
           <div className="mt-6 grid grid-cols-2 gap-3">
             <motion.button
               type="button"
@@ -200,7 +184,6 @@ export default function LoginPage() {
           </div>
         </motion.div>
 
-        {/* Sign Up Link */}
         <motion.div className="mt-6 text-center" variants={itemVariants}>
           <p className="text-sm text-gray-600">
             Don't have an account?{" "}

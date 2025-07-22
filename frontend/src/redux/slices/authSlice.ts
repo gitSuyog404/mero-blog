@@ -1,9 +1,12 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
 interface User {
+  _id: string;
   username: string;
   email: string;
   role: "admin" | "user";
+  firstName?: string;
+  lastName?: string;
 }
 
 interface AuthState {
@@ -11,7 +14,6 @@ interface AuthState {
   accessToken: string | null;
 }
 
-// Helper functions for localStorage and cookies
 const getStoredUserInfo = (): User | null => {
   try {
     const userInfo = localStorage.getItem("userInfo");
@@ -46,7 +48,6 @@ const authSlice = createSlice({
       state.userInfo = user;
       state.accessToken = accessToken;
 
-      // Store in localStorage
       localStorage.setItem("userInfo", JSON.stringify(user));
       localStorage.setItem("accessToken", accessToken);
     },
@@ -58,7 +59,6 @@ const authSlice = createSlice({
       state.userInfo = null;
       state.accessToken = null;
 
-      // Clear localStorage
       localStorage.removeItem("userInfo");
       localStorage.removeItem("accessToken");
     },

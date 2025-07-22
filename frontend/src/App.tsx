@@ -1,11 +1,13 @@
 import { Outlet } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { Navbar, Footer } from "./components";
+import Navbar from "./components/Navbar/Navbar";
+import Footer from "./components/Footer/Footer";
+import AuthInitializer from "./components/AuthInitializer/AuthInitializer";
 
 function App() {
   return (
-    <>
+    <AuthInitializer>
       <div className="min-h-screen flex flex-col">
         <Navbar />
         <main className="pt-16 flex-1">
@@ -25,7 +27,7 @@ function App() {
           theme="light"
         />
       </div>
-    </>
+    </AuthInitializer>
   );
 }
 

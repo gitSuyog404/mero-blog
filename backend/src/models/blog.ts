@@ -87,7 +87,7 @@ const blogSchema = new Schema<IBlog>(
         values: ['draft', 'published'],
         message: '{VALUE} is not supported',
       },
-      default: 'draft',
+      default: 'published',
     },
   },
   {

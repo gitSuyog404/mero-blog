@@ -25,7 +25,7 @@ const login = async (req: Request, res: Response): Promise<void> => {
   try {
     const { email } = req.body as UserData;
     const user = await User.findOne({ email })
-      .select('username email password role')
+      .select('username email password role firstName lastName')
       .lean()
       .exec();
 
@@ -58,18 +58,25 @@ const login = async (req: Request, res: Response): Promise<void> => {
 
     res.status(201).json({
       user: {
+        _id: user._id,
         username: user.username,
         email: user.email,
         role: user.role,
+        firstName: user.firstName,
+        lastName: user.lastName,
       },
       accessToken,
     });
 
-    logger.info('User registered successfully', user);
-  } catch (err) {
+    logger.info('User logged in successfully', {
+      userId: user._id,
+      email: user.email,
+      username: user.username,
+    });
+  } catch (err: any) {
     res.status(500).json({
       code: 'ServerError',
-      message: 'Internal Server Error',
+      message: 'Login failed due to a server error. Please try again later.',
       error: err,
     });
 

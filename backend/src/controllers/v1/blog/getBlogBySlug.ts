@@ -36,16 +36,21 @@ const getBlogBySlug = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // Show only the published post to a normal user
-    if (user?.role === 'user' && blog.status === 'draft') {
-      res.status(403).json({
-        code: 'AuthorizationError',
-        message: 'Access Denied, insufficient permissions',
+    // Restrict draft blogs to authors and admins only
+    if (
+      user?.role === 'user' &&
+      blog.status === 'draft' &&
+      (blog.author as any)?._id?.toString() !== userId
+    ) {
+      res.status(404).json({
+        code: 'NotFound',
+        message: 'Blog not found',
       });
       logger.warn('A user tried to access a draft blog', {
         userId,
-        blog,
+        blogSlug: slug,
       });
+      return;
     }
 
     res.status(200).json({

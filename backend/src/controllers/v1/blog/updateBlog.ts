@@ -47,7 +47,10 @@ const updateBlog = async (req: Request, res: Response): Promise<void> => {
       });
       return;
     }
-    if (blog.author !== userId && user?.role !== 'admin') {
+    if (
+      blog.author.toString() !== userId?.toString() &&
+      user?.role !== 'admin'
+    ) {
       res.status(403).json({
         code: 'AuthorizationError',
         message: 'Access denied, insufficient permissions ',

@@ -24,7 +24,7 @@ import type { Request, Response } from 'express';
 const deleteBlog = async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = req.userId;
-    const blogId = req.params.blogid;
+    const blogId = req.params.blogId;
     const user = await User.findById(userId).select('role').lean().exec();
     const blog = await Blog.findById(blogId)
       .select('author banner.publicId')
@@ -38,7 +38,10 @@ const deleteBlog = async (req: Request, res: Response): Promise<void> => {
       });
       return;
     }
-    if (blog.author !== userId && user?.role !== 'admin') {
+    if (
+      blog.author.toString() !== userId?.toString() &&
+      user?.role !== 'admin'
+    ) {
       res.status(403).json({
         code: 'AuthorizationError',
         message: 'Access denied, insufficient permissions',

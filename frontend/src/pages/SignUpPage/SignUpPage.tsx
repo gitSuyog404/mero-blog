@@ -5,7 +5,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { FaGoogle, FaGithub } from "react-icons/fa";
-import { InputField } from "../../components/Form";
+import InputField from "../../components/Form/InputField";
+import CheckboxField from "../../components/Form/CheckboxField";
+import Loader from "../../components/Loader/Loader";
 import {
   registerSchema,
   type RegisterFormValues,
@@ -22,13 +24,23 @@ export default function SignUpPage() {
   const [register, { isLoading }] = useRegisterMutation();
 
   const initialValues: RegisterFormValues = {
+    firstName: "",
+    lastName: "",
     email: "",
     password: "",
     confirmPassword: "",
-    role: "user", // Always default to user role
+    socialLinks: {
+      website: "",
+      facebook: "",
+      instagram: "",
+      linkedin: "",
+      x: "",
+      youtube: "",
+    },
+    agreeToTerms: false,
+    role: "user",
   };
 
-  // Redirect if already logged in
   useEffect(() => {
     if (userInfo) {
       navigate("/");
@@ -37,8 +49,20 @@ export default function SignUpPage() {
 
   const handleSubmit = async (values: RegisterFormValues) => {
     try {
-      // Remove confirmPassword before sending to API
-      const { confirmPassword, ...submitValues } = values;
+      const { confirmPassword, agreeToTerms, socialLinks, ...baseValues } =
+        values;
+
+      const filteredSocialLinks = Object.fromEntries(
+        Object.entries(socialLinks).filter(([_, value]) => value.trim() !== "")
+      );
+
+      const submitValues = {
+        ...baseValues,
+        ...(Object.keys(filteredSocialLinks).length > 0 && {
+          socialLinks: filteredSocialLinks,
+        }),
+      };
+
       const result = await register(submitValues).unwrap();
       dispatch(setCredentials(result));
       toast.success("Registration successful! Welcome to MeroBlog!");
@@ -79,7 +103,6 @@ export default function SignUpPage() {
         initial="hidden"
         animate="visible"
       >
-        {/* Header */}
         <motion.div className="text-center" variants={itemVariants}>
           <Link
             to="/"
@@ -95,7 +118,6 @@ export default function SignUpPage() {
           </p>
         </motion.div>
 
-        {/* Form Container */}
         <motion.div
           className="mt-8 bg-white py-8 px-4 shadow-lg sm:rounded-lg sm:px-10"
           variants={itemVariants}
@@ -107,7 +129,23 @@ export default function SignUpPage() {
           >
             {({ isValid, dirty }) => (
               <Form className="space-y-6">
-                {/* Email Field */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <InputField
+                    name="firstName"
+                    label="First Name"
+                    type="text"
+                    placeholder="Enter your first name"
+                    autoComplete="given-name"
+                  />
+                  <InputField
+                    name="lastName"
+                    label="Last Name"
+                    type="text"
+                    placeholder="Enter your last name"
+                    autoComplete="family-name"
+                  />
+                </div>
+
                 <InputField
                   name="email"
                   label="Email address"
@@ -116,7 +154,6 @@ export default function SignUpPage() {
                   autoComplete="email"
                 />
 
-                {/* Password Field */}
                 <InputField
                   name="password"
                   label="Password"
@@ -125,7 +162,6 @@ export default function SignUpPage() {
                   autoComplete="new-password"
                 />
 
-                {/* Confirm Password Field */}
                 <InputField
                   name="confirmPassword"
                   label="Confirm Password"
@@ -134,26 +170,69 @@ export default function SignUpPage() {
                   autoComplete="new-password"
                 />
 
-                {/* Terms and Privacy */}
-                <div className="text-sm text-gray-600">
-                  By creating an account, you agree to our{" "}
-                  <Link
-                    to="/terms"
-                    className="text-gray-900 hover:text-gray-700 underline"
-                  >
-                    Terms of Service
-                  </Link>{" "}
-                  and{" "}
-                  <Link
-                    to="/privacy"
-                    className="text-gray-900 hover:text-gray-700 underline"
-                  >
-                    Privacy Policy
-                  </Link>
-                  .
+                <div className="space-y-4">
+                  <h3 className="text-sm font-medium text-gray-900">
+                    Social Links (Optional)
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <InputField
+                      name="socialLinks.website"
+                      label="Website"
+                      type="url"
+                      placeholder="https://yourwebsite.com"
+                    />
+                    <InputField
+                      name="socialLinks.linkedin"
+                      label="LinkedIn"
+                      type="url"
+                      placeholder="https://linkedin.com/in/username"
+                    />
+                    <InputField
+                      name="socialLinks.x"
+                      label="X (Twitter)"
+                      type="url"
+                      placeholder="https://x.com/username"
+                    />
+                    <InputField
+                      name="socialLinks.facebook"
+                      label="Facebook"
+                      type="url"
+                      placeholder="https://facebook.com/username"
+                    />
+                    <InputField
+                      name="socialLinks.instagram"
+                      label="Instagram"
+                      type="url"
+                      placeholder="https://instagram.com/username"
+                    />
+                    <InputField
+                      name="socialLinks.youtube"
+                      label="YouTube"
+                      type="url"
+                      placeholder="https://youtube.com/@username"
+                    />
+                  </div>
                 </div>
 
-                {/* Submit Button */}
+                <CheckboxField name="agreeToTerms">
+                  <span className="text-sm text-gray-600">
+                    I agree to the{" "}
+                    <Link
+                      to="/terms"
+                      className="text-gray-900 hover:text-gray-700 underline"
+                    >
+                      Terms of Service
+                    </Link>{" "}
+                    and{" "}
+                    <Link
+                      to="/privacy"
+                      className="text-gray-900 hover:text-gray-700 underline"
+                    >
+                      Privacy Policy
+                    </Link>
+                  </span>
+                </CheckboxField>
+
                 <motion.button
                   type="submit"
                   disabled={!isValid || !dirty || isLoading}
@@ -163,16 +242,8 @@ export default function SignUpPage() {
                 >
                   {isLoading ? (
                     <div className="flex items-center">
-                      <motion.div
-                        className="w-5 h-5 border-2 border-white border-t-transparent rounded-full mr-2"
-                        animate={{ rotate: 360 }}
-                        transition={{
-                          duration: 1,
-                          repeat: Infinity,
-                          ease: "linear",
-                        }}
-                      />
-                      Creating account...
+                      <Loader size="sm" variant="spinner" />
+                      <span className="ml-2">Creating account...</span>
                     </div>
                   ) : (
                     "Create account"
@@ -182,7 +253,6 @@ export default function SignUpPage() {
             )}
           </Formik>
 
-          {/* Divider */}
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
@@ -196,7 +266,6 @@ export default function SignUpPage() {
             </div>
           </div>
 
-          {/* Social Login Buttons */}
           <div className="mt-6 grid grid-cols-2 gap-3">
             <motion.button
               type="button"
@@ -220,7 +289,6 @@ export default function SignUpPage() {
           </div>
         </motion.div>
 
-        {/* Sign In Link */}
         <motion.div className="mt-6 text-center" variants={itemVariants}>
           <p className="text-sm text-gray-600">
             Already have an account?{" "}

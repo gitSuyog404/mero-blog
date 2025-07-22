@@ -18,6 +18,7 @@ import validationError from '@/middlewares/validationError';
  */
 import likeBlog from '@/controllers/v1/like/likeBlog';
 import unlikeBlog from '@/controllers/v1/like/unlikeBlog';
+import checkLikeStatus from '@/controllers/v1/like/checkLikeStatus';
 
 const router = Router();
 
@@ -26,11 +27,6 @@ router.post(
   authenticate,
   authorize(['admin', 'user']),
   param('blogId').isMongoId().withMessage('Invalid blog Id'),
-  body('userId')
-    .notEmpty()
-    .withMessage('User id is required')
-    .isMongoId()
-    .withMessage('Invalid user Id'),
   validationError,
   likeBlog,
 );
@@ -40,13 +36,17 @@ router.delete(
   authenticate,
   authorize(['admin', 'user']),
   param('blogId').isMongoId().withMessage('Invalid blog Id'),
-  body('userId')
-    .notEmpty()
-    .withMessage('User id is required')
-    .isMongoId()
-    .withMessage('Invalid user Id'),
   validationError,
   unlikeBlog,
+);
+
+router.get(
+  '/blog/:blogId/status',
+  authenticate,
+  authorize(['admin', 'user']),
+  param('blogId').isMongoId().withMessage('Invalid blog Id'),
+  validationError,
+  checkLikeStatus,
 );
 
 export default router;

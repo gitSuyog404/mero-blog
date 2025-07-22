@@ -27,6 +27,16 @@ import User from '@/models/user';
 const router = Router();
 router.post(
   '/register',
+  body('firstName')
+    .optional()
+    .trim()
+    .isLength({ max: 20 })
+    .withMessage('First name must be less than 20 characters'),
+  body('lastName')
+    .optional()
+    .trim()
+    .isLength({ max: 20 })
+    .withMessage('Last name must be less than 20 characters'),
   body('email')
     .trim()
     .notEmpty()
@@ -46,6 +56,42 @@ router.post(
     .withMessage('Password is required')
     .isLength({ min: 8 })
     .withMessage('Password must be at least 8 characters long'),
+  body('socialLinks.website')
+    .optional()
+    .isURL()
+    .withMessage('Website must be a valid URL')
+    .isLength({ max: 100 })
+    .withMessage('Website URL must be less than 100 characters'),
+  body('socialLinks.facebook')
+    .optional()
+    .isURL()
+    .withMessage('Facebook URL must be a valid URL')
+    .isLength({ max: 100 })
+    .withMessage('Facebook URL must be less than 100 characters'),
+  body('socialLinks.instagram')
+    .optional()
+    .isURL()
+    .withMessage('Instagram URL must be a valid URL')
+    .isLength({ max: 100 })
+    .withMessage('Instagram URL must be less than 100 characters'),
+  body('socialLinks.linkedin')
+    .optional()
+    .isURL()
+    .withMessage('LinkedIn URL must be a valid URL')
+    .isLength({ max: 100 })
+    .withMessage('LinkedIn URL must be less than 100 characters'),
+  body('socialLinks.x')
+    .optional()
+    .isURL()
+    .withMessage('X URL must be a valid URL')
+    .isLength({ max: 100 })
+    .withMessage('X URL must be less than 100 characters'),
+  body('socialLinks.youtube')
+    .optional()
+    .isURL()
+    .withMessage('YouTube URL must be a valid URL')
+    .isLength({ max: 100 })
+    .withMessage('YouTube URL must be less than 100 characters'),
   body('role')
     .optional()
     .isString()

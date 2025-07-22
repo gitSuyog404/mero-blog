@@ -23,6 +23,7 @@ import getBlogsByUser from '@/controllers/v1/blog/getBlogsByUser';
 import getBlogBySlug from '@/controllers/v1/blog/getBlogBySlug';
 import updateBlog from '@/controllers/v1/blog/updateBlog';
 import deleteBlog from '@/controllers/v1/blog/deleteBlog';
+import incrementBlogView from '@/controllers/v1/blog/incrementBlogView';
 
 /**
  * Models
@@ -34,9 +35,8 @@ const router = Router();
 router.post(
   '/',
   authenticate,
-  authorize(['admin']),
+  authorize(['admin', 'user']),
   upload.single('banner_image'),
-  body('banner_image').notEmpty().withMessage('Banner image is required'),
   body('title')
     .trim()
     .notEmpty()
@@ -95,10 +95,19 @@ router.get(
   getBlogBySlug,
 );
 
+router.post(
+  '/:blogId/view',
+  authenticate,
+  authorize(['admin', 'user']),
+  param('blogId').isMongoId().withMessage('Invalid blog Id'),
+  validationError,
+  incrementBlogView,
+);
+
 router.put(
   '/:blogId',
   authenticate,
-  authorize(['admin']),
+  authorize(['admin', 'user']),
   param('blogId').isMongoId().withMessage('Invalid Blog Id'),
   upload.single('banner_image'),
   body('title')
@@ -115,5 +124,13 @@ router.put(
   updateBlog,
 );
 
-router.delete('/:blogId', authenticate, authorize(['admin']), deleteBlog);
+router.delete(
+  '/:blogId',
+  authenticate,
+  authorize(['admin', 'user']),
+  param('blogId').isMongoId().withMessage('Invalid Blog Id'),
+  validationError,
+  deleteBlog,
+);
+
 export default router;

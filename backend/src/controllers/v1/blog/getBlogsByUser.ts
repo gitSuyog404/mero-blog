@@ -33,8 +33,8 @@ const getBlogsByUser = async (req: Request, res: Response): Promise<void> => {
       .lean()
       .exec();
     const query: QueryType = {};
-    // Show only the published post to a normal user
-    if (currentUser?.role === 'user') {
+    // Show only the published posts to other users, but show all posts to the author themselves
+    if (currentUser?.role === 'user' && currentUserId?.toString() !== userId) {
       query.status = 'published';
     }
     const total = await Blog.countDocuments({ author: userId, ...query });

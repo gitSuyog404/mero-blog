@@ -29,7 +29,8 @@ const getAllBlogs = async (req: Request, res: Response): Promise<void> => {
       parseInt(req.query.offset as string) || config.defaultResOffset;
     const user = await User.findById(userId).select('role').lean().exec();
     const query: QueryType = {};
-    // Show only the published post to a normal user
+
+    // Show only published blogs to regular users, admins can see all blogs
     if (user?.role === 'user') {
       query.status = 'published';
     }
@@ -40,7 +41,7 @@ const getAllBlogs = async (req: Request, res: Response): Promise<void> => {
       .populate('author', '-createdAt -updatedAt -__v')
       .limit(limit)
       .skip(offset)
-      .sort({ createdAt: -1 })
+      .sort({ publishedAt: -1 })
       .lean()
       .exec();
 

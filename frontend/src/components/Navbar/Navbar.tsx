@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { toast } from "react-toastify";
-import { ProfileDropdown } from "../";
+import ProfileDropdown from "../ProfileDropdown/ProfileDropdown";
 import { useLogoutMutation } from "../../redux/slices/authApiSlice";
 import { logout } from "../../redux/slices/authSlice";
 import type { RootState } from "../../redux/store";
@@ -21,7 +21,6 @@ const Navbar: React.FC<NavbarProps> = ({ className = "" }) => {
   const { userInfo } = useSelector((state: RootState) => state.auth);
   const [logoutApiCall] = useLogoutMutation();
 
-  // Handle scroll effect
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
@@ -31,7 +30,6 @@ const Navbar: React.FC<NavbarProps> = ({ className = "" }) => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close drawer when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -66,36 +64,33 @@ const Navbar: React.FC<NavbarProps> = ({ className = "" }) => {
       toast.success("Logged out successfully");
       navigate("/");
       setIsDrawerOpen(false);
-    } catch (error) {
-      toast.error("Logout failed");
+    } catch (error: any) {
+      console.error("Logout error:", error);
+
+      dispatch(logout());
+      toast.success("Logged out successfully");
+      navigate("/");
+      setIsDrawerOpen(false);
     }
+  };
+
+  const getDisplayName = (user: any) => {
+    if (user?.firstName && user?.lastName) {
+      return `${user.firstName} ${user.lastName}`;
+    } else if (user?.firstName) {
+      return user.firstName;
+    } else if (user?.lastName) {
+      return user.lastName;
+    }
+    return user?.username || "User";
   };
 
   const navItems = [
     { name: "Home", href: "/" },
-    { name: "Write", href: "/write" },
-    { name: "Stories", href: "/stories" },
+    { name: "Stories", href: "/blogs" },
+    ...(userInfo ? [{ name: "Write", href: "/write" }] : []),
     { name: "About", href: "/about" },
   ];
-
-  const drawerVariants = {
-    closed: {
-      x: "100%",
-      transition: {
-        type: "spring",
-        stiffness: 400,
-        damping: 40,
-      },
-    },
-    open: {
-      x: 0,
-      transition: {
-        type: "spring",
-        stiffness: 400,
-        damping: 40,
-      },
-    },
-  };
 
   const overlayVariants = {
     closed: {
@@ -144,7 +139,6 @@ const Navbar: React.FC<NavbarProps> = ({ className = "" }) => {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            {/* Logo */}
             <motion.div
               className="flex-shrink-0"
               whileHover={{ scale: 1.05 }}
@@ -155,7 +149,6 @@ const Navbar: React.FC<NavbarProps> = ({ className = "" }) => {
               </Link>
             </motion.div>
 
-            {/* Desktop Navigation */}
             <div className="hidden md:block">
               <div className="ml-10 flex items-baseline space-x-8">
                 {navItems.map((item) => (
@@ -176,7 +169,6 @@ const Navbar: React.FC<NavbarProps> = ({ className = "" }) => {
               </div>
             </div>
 
-            {/* Desktop Auth Buttons */}
             <div className="hidden md:flex items-center space-x-4">
               {userInfo ? (
                 <ProfileDropdown user={userInfo} />
@@ -208,7 +200,6 @@ const Navbar: React.FC<NavbarProps> = ({ className = "" }) => {
               )}
             </div>
 
-            {/* Mobile menu button */}
             <div className="md:hidden">
               <motion.button
                 onClick={toggleDrawer}
@@ -248,7 +239,6 @@ const Navbar: React.FC<NavbarProps> = ({ className = "" }) => {
         </div>
       </motion.nav>
 
-      {/* Mobile Drawer Overlay */}
       <AnimatePresence>
         {isDrawerOpen && (
           <motion.div
@@ -260,16 +250,14 @@ const Navbar: React.FC<NavbarProps> = ({ className = "" }) => {
           >
             <div className="absolute inset-0 bg-black/50" />
 
-            {/* Mobile Drawer */}
             <motion.div
               className="mobile-drawer absolute right-0 top-0 h-full w-80 max-w-[85vw] bg-white shadow-xl"
-              variants={drawerVariants}
-              initial="closed"
-              animate="open"
-              exit="closed"
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", stiffness: 400, damping: 40 }}
             >
               <div className="flex flex-col h-full">
-                {/* Drawer Header */}
                 <div className="flex items-center justify-between p-6 border-b border-gray-200">
                   <h2 className="text-xl font-semibold text-gray-900">Menu</h2>
                   <motion.button
@@ -293,7 +281,6 @@ const Navbar: React.FC<NavbarProps> = ({ className = "" }) => {
                   </motion.button>
                 </div>
 
-                {/* Navigation Items */}
                 <div className="flex-1 px-6 py-8">
                   <nav className="space-y-6">
                     {navItems.map((item, index) => (
@@ -317,7 +304,6 @@ const Navbar: React.FC<NavbarProps> = ({ className = "" }) => {
                   </nav>
                 </div>
 
-                {/* Drawer Footer */}
                 <div className="p-6 border-t border-gray-200 space-y-4">
                   {userInfo ? (
                     <>
@@ -330,7 +316,7 @@ const Navbar: React.FC<NavbarProps> = ({ className = "" }) => {
                         className="text-center"
                       >
                         <span className="text-gray-700 text-lg font-medium">
-                          Welcome, {userInfo.username}
+                          Welcome, {getDisplayName(userInfo)}
                         </span>
                       </motion.div>
                       <motion.div

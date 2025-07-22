@@ -11,7 +11,7 @@ import type { RootState } from "../store";
 
 const baseQuery = fetchBaseQuery({
   baseUrl: BASE_URL,
-  credentials: "include", // Include cookies for refresh token
+  credentials: "include",
   prepareHeaders: (headers, { getState }) => {
     const token = (getState() as RootState).auth.accessToken;
     if (token) {
@@ -28,9 +28,7 @@ const baseQueryWithReauth: BaseQueryFn<
 > = async (args, api, extraOptions) => {
   let result = await baseQuery(args, api, extraOptions);
 
-  // If we get a 401 error, try to refresh the token
   if (result.error && result.error.status === 401) {
-    // Try to get a new token
     const refreshResult = await baseQuery(
       {
         url: "/auth/refresh-token",
@@ -41,14 +39,11 @@ const baseQueryWithReauth: BaseQueryFn<
     );
 
     if (refreshResult.data) {
-      // Store the new token
       const { accessToken } = refreshResult.data as { accessToken: string };
       api.dispatch(setAccessToken(accessToken));
 
-      // Retry the original query
       result = await baseQuery(args, api, extraOptions);
     } else {
-      // Refresh failed, logout user
       api.dispatch(logout());
     }
   }
@@ -58,6 +53,6 @@ const baseQueryWithReauth: BaseQueryFn<
 
 export const apiSlice = createApi({
   baseQuery: baseQueryWithReauth,
-  tagTypes: ["User", "Auth"],
-  endpoints: (builder) => ({}),
+  tagTypes: ["User", "Auth", "Blog", "Comment"],
+  endpoints: () => ({}),
 });

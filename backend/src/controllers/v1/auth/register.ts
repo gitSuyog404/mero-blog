@@ -19,10 +19,14 @@ import Token from '@/models/token';
 import type { Request, Response } from 'express';
 import type { IUser } from '@/models/user';
 
-type UserData = Pick<IUser, 'email' | 'password' | 'role'>;
+type UserData = Pick<
+  IUser,
+  'email' | 'password' | 'role' | 'firstName' | 'lastName' | 'socialLinks'
+>;
 
 const register = async (req: Request, res: Response): Promise<void> => {
-  const { email, password, role } = req.body as UserData;
+  const { email, password, role, firstName, lastName, socialLinks } =
+    req.body as UserData;
 
   if (role === 'admin' && !config.WHITELIST_ADMINS_MAIL.includes(email)) {
     res.send(403).json({
@@ -43,6 +47,9 @@ const register = async (req: Request, res: Response): Promise<void> => {
       email,
       password,
       role,
+      firstName,
+      lastName,
+      socialLinks,
     });
 
     //Generate access token and refresh token for new users
@@ -66,9 +73,12 @@ const register = async (req: Request, res: Response): Promise<void> => {
 
     res.status(201).json({
       user: {
+        _id: newUser._id,
         username: newUser.username,
         email: newUser.email,
         role: newUser.role,
+        firstName: newUser.firstName,
+        lastName: newUser.lastName,
       },
       accessToken,
     });

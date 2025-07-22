@@ -26,7 +26,6 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
   disabled = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isFocused, setIsFocused] = useState(false);
 
   return (
     <motion.div
@@ -38,7 +37,6 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
       <Field name={name}>
         {({ field, form, meta }: any) => {
           const hasError = meta.touched && meta.error;
-          const hasValue = field.value && field.value !== "";
           const selectedOption = options.find(
             (option) => option.value === field.value
           );
@@ -46,12 +44,10 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
           const handleSelect = (option: Option) => {
             form.setFieldValue(name, option.value);
             setIsOpen(false);
-            setIsFocused(false);
           };
 
           return (
             <div className="relative">
-              {/* Label */}
               <motion.label
                 htmlFor={name}
                 className={clsx(
@@ -71,7 +67,6 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
                 {label}
               </motion.label>
 
-              {/* Dropdown Button */}
               <motion.button
                 type="button"
                 className={clsx(
@@ -89,8 +84,6 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
                   }
                 )}
                 onClick={() => !disabled && setIsOpen(!isOpen)}
-                onFocus={() => setIsFocused(true)}
-                onBlur={() => setIsFocused(false)}
                 disabled={disabled}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -140,7 +133,6 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
                 </motion.svg>
               </motion.button>
 
-              {/* Dropdown Options */}
               <AnimatePresence>
                 {isOpen && (
                   <motion.div
@@ -175,14 +167,12 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
                 )}
               </AnimatePresence>
 
-              {/* Hidden input for form submission */}
               <input type="hidden" name={name} value={field.value || ""} />
             </div>
           );
         }}
       </Field>
 
-      {/* Error Message */}
       <ErrorMessage name={name}>
         {(msg) => (
           <motion.div

@@ -9,6 +9,7 @@ import { logger } from '@/lib/winston';
  */
 import Blog from '@/models/blog';
 import Like from '@/models/like';
+import User from '@/models/user';
 
 /**
  * Types
@@ -18,7 +19,7 @@ import type { Request, Response } from 'express';
 
 const unlikeBlog = async (req: Request, res: Response): Promise<void> => {
   const { blogId } = req.params;
-  const { userId } = req.body;
+  const userId = req.userId; // Get userId from authenticated user
 
   try {
     const existingLike = await Like.findOne({ userId, blogId }).lean().exec();
@@ -32,9 +33,26 @@ const unlikeBlog = async (req: Request, res: Response): Promise<void> => {
     }
 
     await Like.deleteOne({ _id: existingLike._id });
-    const blog = await Blog.findById(blogId).select('likesCount').exec();
+    const blog = await Blog.findById(blogId)
+      .select('likesCount status author')
+      .populate('author', '_id')
+      .exec();
 
     if (!blog) {
+      res.status(404).json({
+        code: 'NotFound',
+        message: 'Blog not found',
+      });
+      return;
+    }
+
+    // Check if user can access this blog (prevent unliking draft blogs by other users)
+    const user = await User.findById(userId).select('role').lean().exec();
+    if (
+      user?.role === 'user' &&
+      blog.status === 'draft' &&
+      (blog.author as any)?._id?.toString() !== userId
+    ) {
       res.status(404).json({
         code: 'NotFound',
         message: 'Blog not found',

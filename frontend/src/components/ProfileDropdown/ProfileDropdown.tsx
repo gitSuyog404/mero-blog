@@ -10,6 +10,8 @@ interface User {
   username: string;
   email: string;
   role: "admin" | "user";
+  firstName?: string;
+  lastName?: string;
 }
 
 interface ProfileDropdownProps {
@@ -23,7 +25,6 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ user }) => {
   const navigate = useNavigate();
   const [logoutApiCall] = useLogoutMutation();
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -50,30 +51,14 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ user }) => {
       toast.success("Logged out successfully");
       navigate("/");
       setIsOpen(false);
-    } catch (error) {
-      toast.error("Logout failed");
-    }
-  };
+    } catch (error: any) {
+      console.error("Logout error:", error);
 
-  const dropdownVariants = {
-    closed: {
-      opacity: 0,
-      scale: 0.95,
-      y: -10,
-      transition: {
-        duration: 0.15,
-        ease: "easeOut",
-      },
-    },
-    open: {
-      opacity: 1,
-      scale: 1,
-      y: 0,
-      transition: {
-        duration: 0.2,
-        ease: "easeOut",
-      },
-    },
+      dispatch(logout());
+      toast.success("Logged out successfully");
+      navigate("/");
+      setIsOpen(false);
+    }
   };
 
   const menuItemVariants = {
@@ -88,9 +73,20 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ user }) => {
     }),
   };
 
-  // Get user initials for avatar
-  const getInitials = (name: string) => {
-    return name
+  const getDisplayName = (user: User) => {
+    if (user.firstName && user.lastName) {
+      return `${user.firstName} ${user.lastName}`;
+    } else if (user.firstName) {
+      return user.firstName;
+    } else if (user.lastName) {
+      return user.lastName;
+    }
+    return user.username;
+  };
+
+  const getInitials = (user: User) => {
+    const displayName = getDisplayName(user);
+    return displayName
       .split(" ")
       .map((word) => word.charAt(0))
       .join("")
@@ -100,7 +96,6 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ user }) => {
 
   return (
     <div className="relative" ref={dropdownRef}>
-      {/* Profile Button */}
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
         className={`flex items-center space-x-3 px-3 py-2 rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 ${
@@ -109,27 +104,23 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ user }) => {
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
       >
-        {/* Avatar with gradient background */}
         <motion.div
           className="relative w-9 h-9 bg-gradient-to-br from-gray-700 via-gray-800 to-gray-900 text-white rounded-full flex items-center justify-center text-sm font-semibold shadow-md ring-2 ring-white"
           whileHover={{ scale: 1.1 }}
           transition={{ duration: 0.2 }}
         >
-          {getInitials(user.username)}
+          {getInitials(user)}
 
-          {/* Online status indicator */}
           <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-400 border-2 border-white rounded-full"></div>
         </motion.div>
 
-        {/* User info - hidden on small screens */}
         <div className="hidden sm:block text-left">
           <div className="text-sm font-medium text-gray-900 truncate max-w-24">
-            {user.username}
+            {getDisplayName(user)}
           </div>
           <div className="text-xs text-gray-500 capitalize">{user.role}</div>
         </div>
 
-        {/* Dropdown Arrow */}
         <motion.svg
           className="w-4 h-4 text-gray-500 flex-shrink-0"
           fill="none"
@@ -147,21 +138,19 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ user }) => {
         </motion.svg>
       </motion.button>
 
-      {/* Dropdown Menu */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
             className="absolute right-0 mt-3 w-72 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50 backdrop-blur-sm"
-            variants={dropdownVariants}
-            initial="closed"
-            animate="open"
-            exit="closed"
+            initial={{ opacity: 0, scale: 0.95, y: -10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: -10 }}
+            transition={{ duration: 0.2 }}
             style={{
               boxShadow:
                 "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
             }}
           >
-            {/* User Info */}
             <motion.div
               className="px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white"
               custom={0}
@@ -171,13 +160,16 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ user }) => {
             >
               <div className="flex items-center space-x-4">
                 <div className="relative w-12 h-12 bg-gradient-to-br from-gray-700 via-gray-800 to-gray-900 text-white rounded-full flex items-center justify-center text-base font-semibold shadow-lg ring-2 ring-white">
-                  {getInitials(user.username)}
-                  {/* Online status indicator */}
+                  {getInitials(user)}
+
                   <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-400 border-2 border-white rounded-full"></div>
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-base font-semibold text-gray-900 truncate">
-                    {user.username}
+                    {getDisplayName(user)}
+                  </p>
+                  <p className="text-sm text-gray-500 truncate">
+                    @{user.username}
                   </p>
                   <p className="text-sm text-gray-600 truncate">{user.email}</p>
                   <span
@@ -193,7 +185,6 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ user }) => {
               </div>
             </motion.div>
 
-            {/* Menu Items */}
             <div className="py-1">
               <motion.button
                 custom={1}
@@ -203,7 +194,7 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ user }) => {
                 className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-150 flex items-center space-x-2"
                 onClick={() => {
                   setIsOpen(false);
-                  // Add profile navigation here if needed
+                  navigate("/dashboard");
                 }}
               >
                 <svg
@@ -216,10 +207,16 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ user }) => {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8 5a2 2 0 012-2h4a2 2 0 012 2v2H8V5z"
                   />
                 </svg>
-                <span>Profile</span>
+                <span>Dashboard</span>
               </motion.button>
 
               <motion.button
@@ -230,7 +227,6 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ user }) => {
                 className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-150 flex items-center space-x-2"
                 onClick={() => {
                   setIsOpen(false);
-                  // Add settings navigation here if needed
                 }}
               >
                 <svg
